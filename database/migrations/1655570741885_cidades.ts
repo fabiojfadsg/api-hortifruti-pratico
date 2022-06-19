@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary();
       table.string('nome').notNullable();
-      table.integer('estado_id').unsigned().notNullable().references('id').inTable('estados').onDelete('cascade');
+      table.integer('estado_id').unsigned().notNullable().references('id').inTable('estados').onDelete('CASCADE');
       table.boolean('ativo').notNullable().defaultTo(true);
     })
   }

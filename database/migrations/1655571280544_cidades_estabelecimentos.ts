@@ -5,8 +5,8 @@ export default class extends BaseSchema {
 
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
-      table.integer('cidade_id').unsigned().nullable().references('id').inTable('cidades')
-      table.integer('estabelecimento_id').unsigned().nullable().references('id').inTable('estabelecimentos')
+      table.integer('cidade_id').unsigned().notNullable().references('id').inTable('cidades')
+      table.integer('estabelecimento_id').unsigned().notNullable().references('id').inTable('estabelecimentos')
       table.decimal('custo_entrega', 8, 2).nullable()
       table.primary(['cidade_id', 'estabelecimento_id'])
     })

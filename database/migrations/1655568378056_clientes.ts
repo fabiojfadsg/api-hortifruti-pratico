@@ -12,10 +12,10 @@ export default class extends BaseSchema {
         .notNullable()
         .references('id')
         .inTable('users')
-        .onDelete('cascade');
+        .onDelete('CASCADE');
       table.string('nome').notNullable();
       table.string('telefone', 15).notNullable();
-      table.timestamp('update_at').notNullable();
+      table.timestamp('updated_at').notNullable();
     })
   }
 
