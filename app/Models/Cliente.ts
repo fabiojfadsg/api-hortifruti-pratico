@@ -20,7 +20,7 @@ export default class Cliente extends BaseModel {
   public updatedAt: DateTime
 
   @hasMany(() => Endereco, {
-    foreignKey: 'cliente_id',
+    foreignKey: 'clienteId',
     localKey: 'id',
   })
   public enderecos: HasMany<typeof Endereco>;

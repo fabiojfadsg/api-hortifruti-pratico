@@ -21,14 +21,14 @@ export default class Endereco extends BaseModel {
   public bairro: string
 
   @column()
-  public pontoRferencia: string | null
+  public pontoReferencia: string | null
 
   @column()
   public complemento: string | null
 
   @hasOne(() => Cidade, {
-    foreignKey: 'cidade_id',
-    localKey: 'id',
+    foreignKey: 'id',
+    localKey: 'cidadeId',
   })
   public cidade: HasOne<typeof Cidade>;
 }
