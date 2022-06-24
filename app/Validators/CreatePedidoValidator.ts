@@ -8,8 +8,8 @@ export default class CreatePedidoValidator {
     estabelecimento_id: schema.number([
       rules.exists({ table: 'estabelecimentos', column: 'id' }),
     ]),
-    meios_pagamento_id: schema.number([
-      rules.exists({ table: 'meios_pagamento', column: 'id' }),
+    meio_pagamento_id: schema.number([
+      rules.exists({ table: 'meios_pagamentos', column: 'id' }),
     ]),
     troco_para: schema.number.nullableAndOptional(),
     observacao: schema.string.nullableAndOptional({ trim: true }),
@@ -27,7 +27,6 @@ export default class CreatePedidoValidator {
     ]),
 
   })
-
 
   public messages: CustomMessages = {}
 }
