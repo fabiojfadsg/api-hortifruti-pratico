@@ -56,59 +56,99 @@ export default class PedidosController {
                 .where('cidade_id', endereco.cidadeId)
                 .first();
 
-                let valorValor = 0;
-                for await (const produto of payload.produtos) {
-                    const prod = await Produto.findByOrFail('id', produto.produto_id);
-                    valorValor += produto.quantidade * prod.preco;
-                }
+            let valorValor = 0;
+            for await (const produto of payload.produtos) {
+                const prod = await Produto.findByOrFail('id', produto.produto_id);
+                valorValor += produto.quantidade * prod.preco;
+            }
 
-                valorValor = estabCidade ? valorValor + estabCidade.custo_entrega : valorValor;
+            valorValor = estabCidade ? valorValor + estabCidade.custo_entrega : valorValor;
 
-                valorValor = parseFloat(valorValor.toFixed(2));
+            valorValor = parseFloat(valorValor.toFixed(2));
 
-                if (payload.troco_para != null && payload.troco_para < valorValor) {
-                    trx.rollback();
-                    return response.badRequest("O valor do troco não pode ser menor que o valor do pedido");
-                }
+            if (payload.troco_para != null && payload.troco_para < valorValor) {
+                trx.rollback();
+                return response.badRequest("O valor do troco não pode ser menor que o valor do pedido");
+            }
 
-                const pedido = await Pedido.create({
-                    hash_id: hash_id,
-                    cliente_id: cliente.id,
-                    estabelecimento_id: payload.estabelecimento_id,
-                    meio_pagamento_id: payload.meios_pagamento_id,
-                    troco_para: payload.troco_para,
-                    pedidos_endereco_id: end.id,
-                    valor: valorValor,
-                    custo_entrega: estabCidade ? estabCidade.custo_entrega : 0,
-                    observacao: payload.observacao,
-                });
+            const pedido = await Pedido.create({
+                hash_id: hash_id,
+                cliente_id: cliente.id,
+                estabelecimento_id: payload.estabelecimento_id,
+                meio_pagamento_id: payload.meios_pagamento_id,
+                troco_para: payload.troco_para,
+                pedidos_endereco_id: end.id,
+                valor: valorValor,
+                custo_entrega: estabCidade ? estabCidade.custo_entrega : 0,
+                observacao: payload.observacao,
+            });
 
-                payload.produtos.forEach(async (produto) => {
-                    let getProduto =  await Produto.findByOrFail('id', produto.produto_id);
+            payload.produtos.forEach(async (produto) => {
+                let getProduto = await Produto.findByOrFail('id', produto.produto_id);
 
-                    await PedidoProduto.create({
-                        pedido_id: pedido.id,
-                        produto_id: produto.produto_id,
-                        valor: getProduto.preco,
-                        quantidade: produto.quantidade,
-                        observacao: produto.observacao,
-                    });
-                });
-
-                await PedidoStatus.create({
+                await PedidoProduto.create({
                     pedido_id: pedido.id,
-                    status_id: 1,
+                    produto_id: produto.produto_id,
+                    valor: getProduto.preco,
+                    quantidade: produto.quantidade,
+                    observacao: produto.observacao,
                 });
+            });
 
-                //Confirma a transação
-                await trx.commit();
-                
-                return response.ok(pedido);
+            await PedidoStatus.create({
+                pedido_id: pedido.id,
+                status_id: 1,
+            });
+
+            //Confirma a transação
+            await trx.commit();
+
+            return response.ok(pedido);
         } catch (error) {
             await trx.rollback();
             return response.badRequest("Something went wrong");
         }
 
     }
-    
+
+    public async index({ response, auth }: HttpContextContract) {
+        const userAuth = await auth.use('api').authenticate();
+        const cliente = await Cliente.findByOrFail('user_id', userAuth.id);
+
+        const pedidos = await Pedido.query()
+            .where('cliente_id', cliente.id)
+            .preload('estabelecimento')
+            .preload('pedido_status', (statusQuery) => {
+                statusQuery.preload('status');
+            })
+            .orderBy('pedido_id', 'desc');
+        return response.json(pedidos);
+    }
+
+    public  async show({ params, response, auth }: HttpContextContract) {
+        const idPedido = params.hash_id;
+        const userAuth = await auth.use('api').authenticate();
+        const cliente = await Cliente.findByOrFail('user_id', userAuth.id);
+
+        const pedido = await Pedido.query()
+            .where('hash_id', idPedido)
+            .preload('produtos', (produtoQuery) => {
+                produtoQuery.preload('produto');
+            })
+            .preload('cliente')
+            .preload('endereco')
+            .preload('estabelecimento')
+            .preload('meios_pagamento')
+            .preload('pedido_status', (statusQuery) => {
+                statusQuery.preload('status');
+            })
+            .first();
+
+        if (pedido == null) {
+            return response.notFound("Pedido não encontrado");
+        }
+
+        return response.json(pedido);
+    }
+
 }
