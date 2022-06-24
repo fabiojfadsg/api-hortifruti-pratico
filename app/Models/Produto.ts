@@ -18,7 +18,7 @@ export default class Produto extends BaseModel {
   public ativo: boolean
 
   @column()
-  public imagem: number | null
+  public imagem: string | null
 
   @column()
   public preco: number

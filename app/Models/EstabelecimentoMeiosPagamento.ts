@@ -6,7 +6,4 @@ export default class EstabelecimentoMeiosPagamento extends BaseModel {
 
   @column({ isPrimary: true })
   public meio_pagamento_id: number
-
-
-
 }

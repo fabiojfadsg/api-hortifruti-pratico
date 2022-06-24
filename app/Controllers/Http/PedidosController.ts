@@ -125,10 +125,8 @@ export default class PedidosController {
         return response.json(pedidos);
     }
 
-    public  async show({ params, response, auth }: HttpContextContract) {
+    public  async show({ params, response }: HttpContextContract) {
         const idPedido = params.hash_id;
-        const userAuth = await auth.use('api').authenticate();
-        const cliente = await Cliente.findByOrFail('user_id', userAuth.id);
 
         const pedido = await Pedido.query()
             .where('hash_id', idPedido)

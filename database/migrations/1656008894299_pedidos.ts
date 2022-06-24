@@ -7,7 +7,11 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary();
       table.string('hash_id').unique().notNullable();
-      table.integer('cliente_id').unsigned().references('id').inTable('clientes');
+      table
+        .integer('cliente_id')
+        .unsigned()
+        .references('id')
+        .inTable('clientes');
       table
         .integer('estabelecimento_id')
         .unsigned()
@@ -26,9 +30,9 @@ export default class extends BaseSchema {
         .unsigned()
         .notNullable()
         .references('id')
-        .inTable('status_pedidos');
+        .inTable('pedido_enderecos');
       table.decimal('valor', 10,2).notNullable();
-      table.decimal('troco_para', 2, 10).nullable();
+      table.decimal('troco_para', 10, 2).nullable();
       table.decimal('custo_entrega', 10, 2).notNullable().defaultTo(0);
       table.decimal('valor_entrega', 10, 2).notNullable().defaultTo(0);
       table.string('observacao').nullable();
