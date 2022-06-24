@@ -28,7 +28,7 @@ export default class PedidosController {
                 capitalization: 'uppercase',
             });
 
-            const hash = await Pedido.findByOrFail('hash', hash_id);
+            const hash = await Pedido.findBy('hash_id', hash_id);
             if (hash == null) {
                 hash_ok = true;
             }
@@ -52,21 +52,21 @@ export default class PedidosController {
 
             //Busca de entrega e calculo valor do pedido
             const estabCidade = await CidadesEstabelecimento.query()
-                .where('estabalecimento_id', payload.estabelecimento_id)
+                .where('estabelecimento_id', payload.estabelecimento_id)
                 .where('cidade_id', endereco.cidadeId)
                 .first();
 
-            let valorValor = 0;
+            let valorTotal = 0;
             for await (const produto of payload.produtos) {
                 const prod = await Produto.findByOrFail('id', produto.produto_id);
-                valorValor += produto.quantidade * prod.preco;
+                valorTotal += produto.quantidade * prod.preco;
             }
 
-            valorValor = estabCidade ? valorValor + estabCidade.custo_entrega : valorValor;
+            valorTotal = estabCidade ? valorTotal + estabCidade.custo_entrega : valorTotal;
 
-            valorValor = parseFloat(valorValor.toFixed(2));
+            valorTotal = parseFloat(valorTotal.toFixed(2));
 
-            if (payload.troco_para != null && payload.troco_para < valorValor) {
+            if (payload.troco_para != null && payload.troco_para < valorTotal) {
                 trx.rollback();
                 return response.badRequest("O valor do troco não pode ser menor que o valor do pedido");
             }
@@ -75,10 +75,10 @@ export default class PedidosController {
                 hash_id: hash_id,
                 cliente_id: cliente.id,
                 estabelecimento_id: payload.estabelecimento_id,
-                meio_pagamento_id: payload.meios_pagamento_id,
+                meio_pagamento_id: payload.meio_pagamento_id,
                 troco_para: payload.troco_para,
                 pedidos_endereco_id: end.id,
-                valor: valorValor,
+                valor: valorTotal,
                 custo_entrega: estabCidade ? estabCidade.custo_entrega : 0,
                 observacao: payload.observacao,
             });
@@ -106,7 +106,7 @@ export default class PedidosController {
             return response.ok(pedido);
         } catch (error) {
             await trx.rollback();
-            return response.badRequest("Something went wrong");
+            return response.badRequest("Something went wrong" + error);
         }
 
     }
