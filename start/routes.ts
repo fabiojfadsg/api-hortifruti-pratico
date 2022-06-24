@@ -19,6 +19,9 @@ Route.group(() => {
     'store', 'index', 'update', 'destroy'
   ]);
 
+  Route.post('/pedidos', 'PedidosController.store');
+  Route.get('/pedidos', 'PedidosController.index');
+
   Route.get('/estabelecimento/pedidos', 'EstabelecimentosController.pedidos');
 
   Route.put('/cliente', 'ClientesController.update');

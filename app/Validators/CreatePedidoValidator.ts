@@ -22,7 +22,7 @@ export default class CreatePedidoValidator {
         observacao: schema.string.nullableAndOptional({ trim: true }),
       }),
     ),
-    endereco_entrega_id: schema.number([
+    endereco_id: schema.number([
       rules.exists({ table: 'enderecos', column: 'id' }),
     ]),
 
